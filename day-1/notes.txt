@@ -1,0 +1,241 @@
+Spring Microservices and Spring Cloud:
+--------------------------------------------------
+
+Monolithic:
+---------------
+
+E-commerce application:
+-----------------------------------
+
+   a) Product Service      => Controller, Service, Dao, Model, UI 
+   b) Customer Service   
+   c) Cart Service
+   d) Order Service
+   e) Payment Service
+
+Presentation Layer (UI)
+Business Layer       
+Data Layer 
+
+  -- Finally when we package our application , we have heavy .war file.
+  
+What are the common problems with monolithic architecture:
+----------------------------------------------------------------------------
+  
+    1) Scalalbility: If there is high traffic for the product service, so we need to scale it. We will take .war file and deploy on other servers. Problem => we scaled entire                             application not product service. 
+
+    2) Code change: If there is requirement to change a code, we need to recompile, test and rebuild / repackage our application, so frequent release cycle is not possible.
+                              We have redeploy our application on each and every machine.
+
+    3) Stick to one technology.
+ 
+Microservices:
+-------------------
+ 
+ -- different way / approach of building an application.
+ -- We break monolithic application into the smaller services.
+   
+E-commerce application:
+-----------------------------------
+
+   a) Product Service      => Controller, Service, Dao, Model, UI 
+   b) Customer Service   
+   c) Cart Service
+   d) Order Service
+   e) Payment Service
+
+ -- All these services are separate projects / applications. 
+ -- Independent services.
+ -- These services are developed and deployed independently. 
+ -- There will be inter-communication between these microservices.
+ -- Each microservice can have its own database.
+ -- Modularity.
+ -- Polygot 
+ -- Scalability (We can scale product services if needed without scaling other microservices)
+ -- Makes release early, fast development (Frequent release cycle. Frequent code change). 
+ 
+Microservices patterns
+Microservices Principles
+12 Factor app
+
+Rajesh RV => Spring Microservices.  Book
+Spring Microserivces in action.  
+
+microservices.io   
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Spring Cloud:
+-----------------
+  * Eureka Server
+  * Config Server
+  * Hystrix 
+  * API Gateway
+
+
+<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>Hoxton.SR1</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+2.2.4.RELEASE
+
+<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.20</version>
+			<scope>provided</scope>
+		</dependency>
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Raw Data For Movies:
+----------------------------
+
+{
+    "title": "Men In Black",
+    "imageUrl": "http://localhost:3000/meninblack.jpg",
+    "releaseYear": 2010,
+    "casts": [
+        { "firstName": "Alex", "lastName": "Browning" },
+        { "firstName": "Anna", "lastName": "Parker" }
+    ]
+}
+
+{
+    "title": "Titanic",
+    "imageUrl": "http://localhost:3000/titanic.jpg",
+    "releaseYear": 2010,
+    "casts": [
+        { "firstName": "Leonardo", "lastName": "Dcapreo" },
+        { "firstName": "Kate", "lastName": "Winslet" }
+    ]
+}
+
+
+{
+    "title": "Avenger",
+    "imageUrl": "http://localhost:3000/avenger.jpg",
+    "releaseYear": 2009,
+    "casts": [
+        { "firstName": "Bob", "lastName": "Martin" },
+        { "firstName": "Kathy", "lastName": "Sierra" }
+    ]
+}
+s
+  
+Raw Data for UserRating:
+--------------------------------
+
+{
+    "userId": "alexB",
+    "ratings": [
+        { "movieId": 2, "rating": 4 },
+        { "movieId": 5, "rating": 5 },
+        { "movieId": 8, "rating": 5 }
+    ]
+} 
+
+Eureka Server:
+--------------------
+
+Why Hard coded URLs are bad?
+---------------------------------------
+-- Change in URL requires code updates.
+-- If we deploy our application on any cloud provider like AWS, GCP etc..., we will get dynamic URLs.
+-- Load Balancing
+-- Based on environments, URLs will be different. (dev, test/QA, prod)
+
+Service Discovery Pattern:
+----------------------------------
+   a) Client-side service discovery
+   b) Server-side service discovery
+
+Steps:
+-----------
+a) We need to start the Eureka Server
+b) Have microservices register themeselves to Eureka Server using Eureka Client
+c) Have microservices locate (consume) other microservices using Eureka Client.
+
+By default port number of Eureka Server is 8761
+
+-- Technology to implement service discovery pattern that Spring cloud uses is "Eureka"
+
+Netflix Open Source:
+
+  a) Eureka is one of the projects that made open source thanks to netflix
+  b) Netflix has bunch of libraries and later they madet them open source
+
+++++++++++++++++++++++++++++++++
+
+-- In spring cloud, client side service discovery is used.
+
+
+        <dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+        </dependency>
+
+       <dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+-- Create a new Spring Boot project as "eureka-server".
+-- Add eureka server dependency.
+
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+        </dependency>
+
+-- Add @EnableEurekaServer annotation to main class.
+-- Add below properties in application.properties file.
+
+server.port=8761
+eureka.client.register-with-eureka=false
+eureka.client.fetch-registry=false
+
++++++++++++++++++++++++++++++++++
+
+-- Add eureka client dependency in all services (movie-info-service, movie-catalog-service, user-rating-service)
+
+<dependency>
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+-- Add @EnableEurekaClient in main class of all services (movie-info-service, movie-catalog-service, user-rating-service).
+
+-- Add spring.application.name property in application.properties file of all services.
+
+++++++++++++++++++++++++++++++++++
+
+-- Start Eureka server first
+-- Then start all services (movie-info-service, movie-catalog-service, user-rating-service) one by one.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
