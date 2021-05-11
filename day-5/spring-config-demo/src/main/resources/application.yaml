@@ -1,0 +1,22 @@
+server:
+   port: 9090
+   
+my:
+   greeting: Hello World
+   
+app:
+   name: MyApp 
+   description: Welcome to ${app.name}
+   
+db:
+   url: jdbc:mysql:localhost:3306/hr
+   host: 127.0.0.1
+   port: 3306
+   usrername: root
+   password: root
+   
+management.endpoints.web.exposure.include: "*"   
+   
+   
+   
+  

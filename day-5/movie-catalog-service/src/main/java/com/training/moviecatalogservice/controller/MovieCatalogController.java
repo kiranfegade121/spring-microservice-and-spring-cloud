@@ -1,0 +1,118 @@
+package com.training.moviecatalogservice.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.training.moviecatalogservice.model.Movie;
+import com.training.moviecatalogservice.model.MovieCatalog;
+import com.training.moviecatalogservice.model.MovieCatalogItem;
+import com.training.moviecatalogservice.model.Rating;
+import com.training.moviecatalogservice.model.UserRating;
+import com.training.moviecatalogservice.service.MovieInfoService;
+import com.training.moviecatalogservice.service.UserRatingService;
+
+@RestController
+@RequestMapping("/api/v1")
+@RefreshScope 
+public class MovieCatalogController {
+	
+	@Value("${app.name}")
+	private String appName;
+	
+	@Value("${app.version}")
+	private String appVersion;
+	
+	@Autowired
+	private MovieInfoService movieInfoService;
+	
+	@Autowired
+	private UserRatingService userRatingService;
+
+	@GetMapping("/catalog/{userId}")
+	public ResponseEntity<MovieCatalog> getMovieCatalog(String userId) {
+
+		// Call user-rating-service to get movie ratings given by user.
+
+		UserRating userRating = userRatingService.getUserRatings(userId);
+		List<Rating> ratings = userRating.getRatings();
+
+		// Prepare MovieCatalog
+		MovieCatalog catalog = new MovieCatalog();
+		catalog.setUserId("alexB");
+
+		List<MovieCatalogItem> catalogItems = new ArrayList<>();
+
+		// Call movie-info-service to get movie details
+
+		for (Rating rating : ratings) {
+
+			Movie movie = movieInfoService.fetchMovieDetails(rating);
+			catalogItems.add(new MovieCatalogItem(movie, rating.getRating()));
+		}
+		catalog.setCatalogItems(catalogItems);
+		return new ResponseEntity<MovieCatalog>(catalog, HttpStatus.OK);
+	}
+	
+//	@GetMapping("/catalog-feign/{userId}")
+//	public ResponseEntity<MovieCatalog> getMovieCatalogUsingFeignClient(String userId) {
+//
+//		// Call user-rating-service to get movie ratings given by user.
+//
+//		UserRating userRating = userRatingServiceProxy.getMovieRatings("alexB").getBody();
+//		List<Rating> ratings = userRating.getRatings();
+//
+//		// Prepare MovieCatalog
+//		MovieCatalog catalog = new MovieCatalog();
+//		catalog.setUserId("alexB");
+//
+//		List<MovieCatalogItem> catalogItems = new ArrayList<>();
+//
+//		// Call movie-info-service to get movie details
+//
+//		for (Rating rating : ratings) {
+//
+//			Movie movie = movieInfoServiceProxy.getMovieDetails(rating.getMovieId()).getBody();
+//			catalogItems.add(new MovieCatalogItem(movie, rating.getRating()));
+//		}
+//
+//		catalog.setCatalogItems(catalogItems);
+//		return new ResponseEntity<MovieCatalog>(catalog, HttpStatus.OK);
+//	}
+	
+	@GetMapping("/appdetails")
+	public String getAppDetails() {
+		return appName + " - " + appVersion;
+	}
+	
+//	@GetMapping("/movies/{userId}/count")
+//	public ResponseEntity<Integer> getMovieCounts(@PathVariable String userId) {
+//		int count = userRatingService.getMoieCounts(userId);
+//		return new ResponseEntity<Integer>(count, HttpStatus.OK);
+//	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
